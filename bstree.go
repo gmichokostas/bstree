@@ -106,6 +106,27 @@ func min(node *Node) (*Node, bool) {
 	return min(node.left)
 }
 
+// DeleteMin deletes the min item of the tree
+func (tree *BSTree) DeleteMin() bool {
+	if tree.IsEmpty() {
+		return false
+	}
+
+	tree.Root = deleteMin(tree.Root)
+	return true
+}
+
+func deleteMin(node *Node) *Node {
+	if node.left == nil {
+		return node.right
+	}
+
+	node.left = deleteMin(node.left)
+	node.size = node.left.Size() + node.right.Size() + 1
+
+	return node
+}
+
 // InOrderPrint traversal of the tree
 func (tree *BSTree) InOrderPrint() {
 	inOrder(tree.Root)
@@ -120,7 +141,5 @@ func inOrder(node *Node) {
 }
 
 func (tree *BSTree) String() string {
-	tree.InOrderPrint()
-
 	return fmt.Sprintf("%v", tree.Root)
 }

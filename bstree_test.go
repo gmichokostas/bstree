@@ -301,3 +301,35 @@ func Test_min(t *testing.T) {
 		})
 	}
 }
+
+func TestBSTree_DeleteMin(t *testing.T) {
+	type fields struct {
+		Root *Node
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   bool
+	}{
+		{
+			name:   "deletes the min item of the tree and returns true",
+			fields: fields{Root: &Node{item: Int(2), left: &Node{item: Int(1)}}},
+			want:   true,
+		},
+		{
+			name:   "returns false when there are no item in the tree to delete",
+			fields: fields{Root: nil},
+			want:   false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tree := &BSTree{
+				Root: tt.fields.Root,
+			}
+			if got := tree.DeleteMin(); got != tt.want {
+				t.Errorf("BSTree.DeleteMin() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
