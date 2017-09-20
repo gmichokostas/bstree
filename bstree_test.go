@@ -333,3 +333,43 @@ func TestBSTree_DeleteMin(t *testing.T) {
 		})
 	}
 }
+
+func TestBSTree_Delete(t *testing.T) {
+	type fields struct {
+		Root *Node
+	}
+	type args struct {
+		item Item
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   Item
+		want1  bool
+	}{
+		{
+			name:   "deletes an item from the tree",
+			fields: fields{Root: &Node{item: Int(1), size: 1}},
+			args:   args{item: Int(1)},
+			want:   nil,
+			want1:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tree := &BSTree{
+				Root: tt.fields.Root,
+			}
+			tree.Delete(tt.args.item)
+
+			got, got1 := tree.Find(tt.args.item)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("BSTree.Find() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("BSTree.Find() got = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}

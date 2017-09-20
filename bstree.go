@@ -127,6 +127,41 @@ func deleteMin(node *Node) *Node {
 	return node
 }
 
+// Delete an item from the tree
+func (tree *BSTree) Delete(item Item) {
+	tree.Root = delete(tree.Root, item)
+}
+
+func delete(node *Node, item Item) *Node {
+	if node == nil {
+		return nil
+	}
+
+	if item.LessThan(node.item) {
+		node.left = delete(node.left, item)
+	} else if item.MoreThan(node.item) {
+		node.right = delete(node.right, item)
+	} else {
+
+		if node.right == nil {
+			return node.left
+		}
+
+		if node.left == nil {
+			return node.right
+		}
+
+		t := node
+		node, _ = min(t.right)
+		node.right = deleteMin(t.right)
+		node.left = t.left
+	}
+
+	node.size = node.left.Size() + node.right.Size() + 1
+
+	return node
+}
+
 // InOrderPrint traversal of the tree
 func (tree *BSTree) InOrderPrint() {
 	inOrder(tree.Root)
