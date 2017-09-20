@@ -87,6 +87,25 @@ func find(node *Node, item Item) (Item, bool) {
 	}
 }
 
+// Min returns the min item of the tree
+func (tree *BSTree) Min() (Item, bool) {
+	if tree.IsEmpty() {
+		return nil, false
+	}
+
+	node, found := min(tree.Root)
+
+	return node.item, found
+}
+
+func min(node *Node) (*Node, bool) {
+	if (node.left) == nil {
+		return node, true
+	}
+
+	return min(node.left)
+}
+
 // InOrderPrint traversal of the tree
 func (tree *BSTree) InOrderPrint() {
 	inOrder(tree.Root)

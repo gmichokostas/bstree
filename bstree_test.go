@@ -237,3 +237,67 @@ func TestBSTree_String(t *testing.T) {
 	}
 
 }
+
+func TestBSTree_Min(t *testing.T) {
+	type fields struct {
+		Root *Node
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   Item
+		want1  bool
+	}{
+		{
+			name:   "returns the min item of the tree and true when found",
+			fields: fields{Root: &Node{item: Int(2), left: &Node{item: Int(1)}}},
+			want:   Int(1),
+			want1:  true,
+		},
+		{
+			name:   "returns nil and false there are no items in the tree",
+			fields: fields{Root: nil},
+			want:   nil,
+			want1:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tree := &BSTree{
+				Root: tt.fields.Root,
+			}
+			got, got1 := tree.Min()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("BSTree.Min() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("BSTree.Min() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func Test_min(t *testing.T) {
+	type args struct {
+		node *Node
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  *Node
+		want1 bool
+	}{
+	// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := min(tt.args.node)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("min() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("min() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
