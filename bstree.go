@@ -1,35 +1,33 @@
 package bstree
 
 import (
+	"errors"
 	"fmt"
+
+	"golang.org/x/exp/constraints"
 )
 
 // BSTree represents a binary tree
-type BSTree struct {
-	Root *Node
-}
-
-// New returns a pointer to a new binary tree
-func New() *BSTree {
-	return &BSTree{}
+type BSTree[K constraints.Ordered, V any] struct {
+	Root *Node[K, V]
 }
 
 // IsEmpty checks if the BSTree is empty
-func (tree *BSTree) IsEmpty() bool {
+func (tree *BSTree[K, V]) IsEmpty() bool {
 	return tree.Root == nil
 }
 
 // Size returns the size of the tree
-func (tree *BSTree) Size() int {
+func (tree *BSTree[K, V]) Size() int {
 	return tree.Root.Size()
 }
 
 // Height returns the height of the tree
-func (tree *BSTree) Height() int {
+func (tree *BSTree[K, V]) Height() int {
 	return height(tree.Root)
 }
 
-func height(node *Node) int {
+func height[K constraints.Ordered, V any](node *Node[K, V]) int {
 	if node == nil {
 		return 0
 	}
@@ -47,21 +45,22 @@ func height(node *Node) int {
 }
 
 // Put the item to the node
-func (tree *BSTree) Put(item Item) {
-	tree.Root = put(tree.Root, item)
+func (tree *BSTree[K, V]) Put(key K, val V) {
+	tree.Root = put(tree.Root, key, val)
+
 }
 
-func put(node *Node, item Item) *Node {
+func put[K constraints.Ordered, V any](node *Node[K, V], key K, val V) *Node[K, V] {
 	if node == nil {
-		return &Node{item: item, size: 1}
+		return &Node[K, V]{key: key, value: val, size: 1}
 	}
 
-	if item.LessThan(node.item) {
-		node.left = put(node.left, item)
-	} else if item.MoreThan(node.item) {
-		node.right = put(node.right, item)
+	if key < node.key {
+		node.left = put(node.left, key, val)
+	} else if key > node.key {
+		node.right = put(node.right, key, val)
 	} else {
-		node.item = item
+		node.value = val
 	}
 
 	node.size = 1 + node.left.Size() + node.right.Size()
@@ -69,54 +68,54 @@ func put(node *Node, item Item) *Node {
 }
 
 // Find search for an item in the tree
-func (tree *BSTree) Find(item Item) (Item, bool) {
-	return find(tree.Root, item)
+func (tree *BSTree[K, V]) Get(key K) (V, bool) {
+	return get(tree.Root, key)
 }
 
-func find(node *Node, item Item) (Item, bool) {
+func get[K constraints.Ordered, V any](node *Node[K, V], key K) (V, bool) {
 	if node == nil {
-		return nil, false
+		return *new(V), false
 	}
 
-	if item.LessThan(node.item) {
-		return find(node.left, item)
-	} else if item.MoreThan(node.item) {
-		return find(node.right, item)
+	if key < node.key {
+		return get(node.left, key)
+	} else if key > node.key {
+		return get(node.right, key)
 	} else {
-		return node.item, true
+		return node.value, true
 	}
 }
 
-// Min returns the min item of the tree
-func (tree *BSTree) Min() (Item, bool) {
+// Min returns the smallest key in the table
+func (tree *BSTree[K, V]) Min() (K, error) {
 	if tree.IsEmpty() {
-		return nil, false
+		return *new(K), errors.New("calls min() on empty tree")
 	}
 
-	node, found := min(tree.Root)
+	node := min(tree.Root)
 
-	return node.item, found
+	return node.key, nil
 }
 
-func min(node *Node) (*Node, bool) {
+func min[K constraints.Ordered, V any](node *Node[K, V]) *Node[K, V] {
 	if (node.left) == nil {
-		return node, true
+		return node
 	}
 
 	return min(node.left)
 }
 
-// DeleteMin deletes the min item of the tree
-func (tree *BSTree) DeleteMin() bool {
+// DeleteMin deletes the smallest key and associated value from the table.
+func (tree *BSTree[K, V]) DeleteMin() error {
 	if tree.IsEmpty() {
-		return false
+		return errors.New("Symbol table is empty")
 	}
 
 	tree.Root = deleteMin(tree.Root)
-	return true
+	return nil
 }
 
-func deleteMin(node *Node) *Node {
+func deleteMin[K constraints.Ordered, V any](node *Node[K, V]) *Node[K, V] {
 	if node.left == nil {
 		return node.right
 	}
@@ -127,20 +126,20 @@ func deleteMin(node *Node) *Node {
 	return node
 }
 
-// Delete an item from the tree
-func (tree *BSTree) Delete(item Item) {
-	tree.Root = delete(tree.Root, item)
+// Removes the specified key and its associated value from this symbol table
+func (tree *BSTree[K, V]) Delete(key K) {
+	tree.Root = delete(tree.Root, key)
 }
 
-func delete(node *Node, item Item) *Node {
+func delete[K constraints.Ordered, V any](node *Node[K, V], key K) *Node[K, V] {
 	if node == nil {
 		return nil
 	}
 
-	if item.LessThan(node.item) {
-		node.left = delete(node.left, item)
-	} else if item.MoreThan(node.item) {
-		node.right = delete(node.right, item)
+	if key < node.key {
+		node.left = delete(node.left, key)
+	} else if key > node.key {
+		node.right = delete(node.right, key)
 	} else {
 
 		if node.right == nil {
@@ -152,7 +151,7 @@ func delete(node *Node, item Item) *Node {
 		}
 
 		t := node
-		node, _ = min(t.right)
+		node = min(t.right)
 		node.right = deleteMin(t.right)
 		node.left = t.left
 	}
@@ -163,18 +162,18 @@ func delete(node *Node, item Item) *Node {
 }
 
 // InOrderPrint traversal of the tree
-func (tree *BSTree) InOrderPrint() {
+func (tree *BSTree[K, V]) InOrderPrint() {
 	inOrder(tree.Root)
 }
 
-func inOrder(node *Node) {
+func inOrder[K constraints.Ordered, V any](node *Node[K, V]) {
 	if node != nil {
 		inOrder(node.left)
-		fmt.Printf("%v ", node.item)
+		fmt.Printf("%v ", node.value)
 		inOrder(node.right)
 	}
 }
 
-func (tree *BSTree) String() string {
+func (tree *BSTree[K, V]) String() string {
 	return fmt.Sprintf("%v", tree.Root)
 }

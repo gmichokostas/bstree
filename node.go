@@ -1,16 +1,21 @@
 package bstree
 
-import "fmt"
+import (
+	"fmt"
+
+	"golang.org/x/exp/constraints"
+)
 
 // Node is the basic data unit of the binary tree
-type Node struct {
+type Node[K constraints.Ordered, V any] struct {
 	size        int
-	item        Item
-	left, right *Node
+	key         K
+	value       V
+	left, right *Node[K, V]
 }
 
-// Size returns the size of the node
-func (node *Node) Size() int {
+// Size returns the number of nodes in subtree
+func (node *Node[K, V]) Size() int {
 	if node == nil {
 		return 0
 	}
@@ -18,6 +23,6 @@ func (node *Node) Size() int {
 	return node.size
 }
 
-func (node *Node) String() string {
-	return fmt.Sprintf("Item: %v (Left: %v Right: %v)", node.item, node.left, node.right)
+func (node *Node[K, V]) String() string {
+	return fmt.Sprintf("Key: %v Value: %v (Left: %v Right: %v)", node.key, node.value, node.left, node.right)
 }
